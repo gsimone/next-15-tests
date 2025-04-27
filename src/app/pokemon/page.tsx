@@ -1,19 +1,60 @@
 "use client";
 
 import { Suspense } from "react";
-import { useSuspenseListPokemon } from "./data";
-import { PokemonCard } from "./pokemonCard";
+import { useSuspenseFetchPokemon, useSuspenseListPokemon } from "./data";
+import { useIntersectionObserver } from "@uidotdev/usehooks";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import Image from "next/image";
 
+function PokemonCardImage({ name, id }: { name: string; id: number }) {
+  const { data } = useSuspenseFetchPokemon(id);
+
+  return (
+    <Image
+      style={{
+        imageRendering: "pixelated",
+      }}
+      className="w-full h-full object-cover"
+      src={data.sprites.front_default}
+      alt={name}
+      width={100}
+      height={100}
+    />
+  );
+}
+
+const PokemonCard = ({ name, id }: { name: string; id: number }) => {
+  const [ref, entry] = useIntersectionObserver({
+    threshold: 0,
+    root: null,
+    rootMargin: "0px",
+  });
+
+  return (
+    <Card ref={ref} key={name} className="w-[350px] h-[400px] relative overflow-hidden p-0">
+      <CardContent className="p-0 h-full">
+        <Suspense key={name} fallback={<div className="flex items-center justify-center">...</div>}>
+          {entry?.isIntersecting && <PokemonCardImage name={name} id={id} />}
+        </Suspense>
+      </CardContent>
+      <div className="absolute bottom-0 left-0 p-4 z-10">
+        <CardTitle className=" drop-shadow-md capitalize">
+          #{id} - {name}
+        </CardTitle>
+      </div>
+    </Card>
+  );
+};
 
 function PokemonList() {
   const { data } = useSuspenseListPokemon();
 
+
+
   return (
     <div className="grid grid-cols-3 gap-4">
       {data.map((pokemon) => (
-        <Suspense key={pokemon.name} fallback={<div className="h-34 w-34 flex items-center justify-center">...</div>}>
-          <PokemonCard name={pokemon.name} id={pokemon.id} url={pokemon.url} />
-        </Suspense>
+        <PokemonCard key={pokemon.id} name={pokemon.name} id={pokemon.id} url={pokemon.url} />
       ))}
     </div>
   );
