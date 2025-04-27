@@ -5,6 +5,7 @@ import { useSuspenseFetchPokemon, useSuspenseListPokemon } from "./data";
 import { useIntersectionObserver } from "@uidotdev/usehooks";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import Image from "next/image";
+import Link from "next/link";
 
 function PokemonCardImage({ name, id }: { name: string; id: number }) {
   const { data } = useSuspenseFetchPokemon(id);
@@ -31,8 +32,9 @@ const PokemonCard = ({ name, id }: { name: string; id: number }) => {
   });
 
   return (
-    <Card ref={ref} key={name} className="w-[350px] h-[400px] relative overflow-hidden p-0">
-      <CardContent className="p-0 h-full">
+    <Link href={`/pokemon/${id}`} className="w-[350px] h-[400px] relative overflow-hidden p-0"  >
+      <Card ref={ref} key={name} className="relative h-full w-full">
+        <CardContent className="p-0 h-full">
         <Suspense key={name} fallback={<div className="flex items-center justify-center">...</div>}>
           {entry?.isIntersecting && <PokemonCardImage name={name} id={id} />}
         </Suspense>
@@ -40,9 +42,10 @@ const PokemonCard = ({ name, id }: { name: string; id: number }) => {
       <div className="absolute bottom-0 left-0 p-4 z-10">
         <CardTitle className=" drop-shadow-md capitalize">
           #{id} - {name}
-        </CardTitle>
-      </div>
-    </Card>
+          </CardTitle>
+        </div>
+      </Card>
+    </Link>
   );
 };
 
